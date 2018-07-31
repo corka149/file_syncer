@@ -1,3 +1,5 @@
+extern crate file_syncer;
+
 fn main() {
-    println!("Hello, world!");
+    file_syncer::run_syncer();
 }
