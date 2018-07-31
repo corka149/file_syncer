@@ -8,14 +8,14 @@ impl fmt::Display for PathError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "exptected path: Provided string does not define a path to a directory!"
+            "exptected path: No valid path to a directory found!"
         )
     }
 }
 
 impl error::Error for PathError {
     fn description(&self) -> &str {
-        "exptected path: Provided string does not define a path to a directory!"
+        "exptected path: No valid path to a directory found!"
     }
 
     fn cause(&self) -> Option<&error::Error> {

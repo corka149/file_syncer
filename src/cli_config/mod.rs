@@ -1,7 +1,9 @@
 pub mod execution_mode;
 
-use clap::Arg;
+use clap::{Arg, ArgMatches};
 use self::execution_mode::ExecutionMode;
+use std::error::Error;
+use super::error::PathError;
 
 const PATH: &str = "path";
 const MODE: &str = "mode";
@@ -12,16 +14,16 @@ const APP_NAME: &str = env!("CARGO_PKG_NAME");
 const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 
-pub struct ExtractedArgs<'a> {
-    pub path: &'a str,
-    pub mode: execution_mode::ExecutionMode,
-    pub command: &'a str,
-    pub file_filter: &'a str
+pub struct ExtractedArgs {
+    pub path: String,
+    pub mode: Option<execution_mode::ExecutionMode>,
+    pub command: Option<String>,
+    pub file_filter: Option<String>
 }
 
 // Lifetime 'a must outlive 'b
 pub struct CliConfig<'b, 'a: 'b> {
-    pub cli_args: Vec<Arg<'a, 'b>>
+    cli_args: Vec<Arg<'a, 'b>>
 }
 
 impl<'b, 'a: 'b> CliConfig<'a, 'b>{
@@ -35,6 +37,24 @@ impl<'b, 'a: 'b> CliConfig<'a, 'b>{
         CliConfig{
             cli_args: config
         }
+    }
+
+    pub fn get_cli_args(&'a self) -> &'a [Arg<'a , 'b>] {
+        &self.cli_args
+    }
+
+    pub fn extract_args(matches: ArgMatches) -> Result<ExtractedArgs, PathError> {
+        let path = match matches.value_of(PATH) {
+            Some(val) => val,
+            None =>  return Err(PathError)
+        };
+
+        Ok(ExtractedArgs{
+            path: String::from(path),
+            mode: None,
+            command: None,
+            file_filter: None
+        })
     }
 
     fn create_path_conf() -> Arg<'a, 'b> {
