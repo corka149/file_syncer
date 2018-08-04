@@ -1,6 +1,26 @@
 use std::net::{SocketAddr, IpAddr, Ipv4Addr};
 use std::fmt;
 
+/// Tests if two &str do equal
+#[macro_export]
+macro_rules! do_str_equal {
+    ($first:expr, $second:expr) =>   {
+        // Expands to an expression
+        {
+            let mut equals = true;
+            let mut chars = $second.chars();
+            for x in $first.chars() {
+                if let Some(y) = chars.next() {
+                    if x != y {
+                        equals = false;
+                    }
+                }
+            }
+            equals
+        }
+    }
+}
+
 /// Determines in which mode file_syncer will be started.
 pub enum ExecutionMode{
     Autonomous,
@@ -18,7 +38,19 @@ impl ExecutionMode {
         let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
 
         match possible_mode {
-            Some(_) => Some(ExecutionMode::Autonomous), 
+            Some(mode) => {
+                if do_str_equal!(ExecutionMode::CLIENT, mode) {
+                    Some(ExecutionMode::Client(socket))
+                } else if do_str_equal!(ExecutionMode::SERVER, mode) {
+                    Some(ExecutionMode::Server(8080))
+                } else if do_str_equal!(ExecutionMode::AUTONOMOUS, mode) {                    
+                    Some(ExecutionMode::Autonomous)
+                } else {
+                    println!("Warning! Unknown mode detected '{}'. Switched to default '{}'.", 
+                        mode, ExecutionMode::AUTONOMOUS);
+                    Some(ExecutionMode::Autonomous)
+                }
+            }, 
             None => None
         }
     }
@@ -34,6 +66,32 @@ impl fmt::Display for ExecutionMode {
         };
 
         write!(f, "{}", text)
+    }
+
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_do_str_equal_true() {
+        assert!(do_str_equal!("yes", "yes"));
+    }
+
+    #[test]
+    fn test_do_str_equal_false() {
+        assert!(!do_str_equal!("yes", "no"));
+    }
+    
+    #[test]
+    fn test_do_str_equal_similar_case_different_str_false() {
+        assert!(!do_str_equal!("yes", "yEs"));
+    }
+    
+    #[test]
+    fn test_do_str_equal_similar_str_false() {
+        assert!(!do_str_equal!("yes", " yes"));
     }
 
 }

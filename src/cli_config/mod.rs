@@ -2,7 +2,6 @@ pub mod execution_mode;
 pub mod extracted_args;
 
 use clap::{Arg, ArgMatches};
-use std::fmt;
 
 use self::execution_mode::ExecutionMode;
 use super::error::PathError;
