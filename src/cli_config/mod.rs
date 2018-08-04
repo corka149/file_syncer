@@ -1,25 +1,18 @@
 pub mod execution_mode;
+pub mod extracted_args;
 
 use clap::{Arg, ArgMatches};
+use std::fmt;
+
 use self::execution_mode::ExecutionMode;
-use std::error::Error;
 use super::error::PathError;
+use self::extracted_args::ExtractedArgs;
 
 const PATH: &str = "path";
 const MODE: &str = "mode";
 const COMMAND: &str = "command";
 const FILE_FILTER: &str = "filter";
 
-const APP_NAME: &str = env!("CARGO_PKG_NAME");
-const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
-
-
-pub struct ExtractedArgs {
-    pub path: String,
-    pub mode: Option<execution_mode::ExecutionMode>,
-    pub command: Option<String>,
-    pub file_filter: Option<String>
-}
 
 // Lifetime 'a must outlive 'b
 pub struct CliConfig<'b, 'a: 'b> {
@@ -48,10 +41,12 @@ impl<'b, 'a: 'b> CliConfig<'a, 'b>{
             Some(val) => val,
             None =>  return Err(PathError)
         };
+        let mode = matches.value_of(MODE);
+        let mode = ExecutionMode::determine_mode(mode);
 
         Ok(ExtractedArgs{
             path: String::from(path),
-            mode: None,
+            mode: mode,
             command: None,
             file_filter: None
         })
