@@ -11,6 +11,8 @@ const PATH: &str = "path";
 const MODE: &str = "mode";
 const COMMAND: &str = "command";
 const FILE_FILTER: &str = "filter";
+const PORT: &str = "port";
+const HOST: &str = "host";
 
 
 // Lifetime 'a must outlive 'b
@@ -26,6 +28,8 @@ impl<'b, 'a: 'b> CliConfig<'a, 'b>{
         config.push(CliConfig::create_mode_conf());
         config.push(CliConfig::create_command_conf());
         config.push(CliConfig::create_filter_conf());
+        config.push(CliConfig::create_port_conf());
+        config.push(CliConfig::create_host_conf());
         CliConfig{
             cli_args: config
         }
@@ -80,9 +84,27 @@ impl<'b, 'a: 'b> CliConfig<'a, 'b>{
 
     fn create_filter_conf() -> Arg<'a, 'b> {
         Arg::with_name(FILE_FILTER)
-            .help("The filter will applied before sending or requesting on each file name")
+            .help("The filter will applied before sending or requesting on each file name.")
             .long(FILE_FILTER)
             .short("F")
+            .takes_value(true)
+    }
+
+    fn create_port_conf() -> Arg<'a, 'b> {
+        Arg::with_name(PORT)
+            .help("The port nummer which will be used for hosting in server mode.")
+            .long(PORT)
+            .short("P")
+            .required_if(MODE, "S")
+            .takes_value(true)
+    }
+
+    fn create_host_conf() -> Arg<'a, 'b> {
+        Arg::with_name(HOST)
+            .help("Specifies to which host the client should connect in client mode. E.g.: 192.168.0.1:8000")
+            .long(HOST)
+            .short("H")
+            .required_if(MODE, "C")
             .takes_value(true)
     }
 }
