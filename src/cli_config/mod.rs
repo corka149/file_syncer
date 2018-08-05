@@ -45,7 +45,9 @@ impl<'b, 'a: 'b> CliConfig<'a, 'b>{
             None =>  return Err(PathError)
         };
         let mode = matches.value_of(MODE);
-        let mode = ExecutionMode::determine_mode(mode);
+        let host = matches.value_of(HOST);
+        let port = matches.value_of(PORT);
+        let mode = ExecutionMode::determine_mode(mode, host, port);
 
         Ok(ExtractedArgs{
             path: String::from(path),

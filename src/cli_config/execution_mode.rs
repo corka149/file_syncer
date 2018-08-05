@@ -34,7 +34,8 @@ impl ExecutionMode {
     pub const SERVER: &'static str = "S";
     pub const CLIENT: &'static str = "C";
 
-    pub fn determine_mode(possible_mode: Option<&str>) -> Option<ExecutionMode> {
+    pub fn determine_mode(possible_mode: Option<&str>, possible_host: Option<&str>,
+        possible_port: Option<&str>) -> Option<ExecutionMode> {
         let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
 
         match possible_mode {
@@ -42,7 +43,7 @@ impl ExecutionMode {
                 if do_str_equal!(ExecutionMode::CLIENT, mode) {
                     Some(ExecutionMode::Client(socket))
                 } else if do_str_equal!(ExecutionMode::SERVER, mode) {
-                    Some(ExecutionMode::Server(8080))
+                    ExecutionMode::create_server(possible_port)
                 } else if do_str_equal!(ExecutionMode::AUTONOMOUS, mode) {                    
                     Some(ExecutionMode::Autonomous)
                 } else {
@@ -51,6 +52,30 @@ impl ExecutionMode {
                     Some(ExecutionMode::Autonomous)
                 }
             }, 
+            None => None
+        }
+    }
+
+    fn create_server(possible_port: Option<&str>) -> Option<ExecutionMode> {
+        let port = ExecutionMode::extract_port(possible_port);
+        match port {
+            Some(port) => Some(ExecutionMode::Server(port)),
+            None => None
+        }   
+    }
+
+    fn extract_port(possible_port: Option<&str>) -> Option<u16> {
+        match possible_port {
+            Some(val) => {
+                let port = val.parse::<u16>();
+                match port {
+                    Ok(port) =>  Some(port),
+                    Err(e) =>  {
+                        eprintln!("{:?}", e);
+                        None
+                    }
+                }
+            },
             None => None
         }
     }
