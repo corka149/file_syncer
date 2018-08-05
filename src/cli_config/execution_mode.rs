@@ -1,4 +1,4 @@
-use std::net::{SocketAddr, IpAddr, Ipv4Addr};
+use std::net::SocketAddr;
 use std::fmt;
 
 /// Tests if two &str do equal
@@ -36,12 +36,11 @@ impl ExecutionMode {
 
     pub fn determine_mode(possible_mode: Option<&str>, possible_host: Option<&str>,
         possible_port: Option<&str>) -> Option<ExecutionMode> {
-        let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
 
         match possible_mode {
             Some(mode) => {
                 if do_str_equal!(ExecutionMode::CLIENT, mode) {
-                    Some(ExecutionMode::Client(socket))
+                    ExecutionMode::create_client(possible_host)
                 } else if do_str_equal!(ExecutionMode::SERVER, mode) {
                     ExecutionMode::create_server(possible_port)
                 } else if do_str_equal!(ExecutionMode::AUTONOMOUS, mode) {                    
@@ -52,6 +51,31 @@ impl ExecutionMode {
                     Some(ExecutionMode::Autonomous)
                 }
             }, 
+            None => None
+        }
+    }
+
+    fn create_client(possible_host: Option<&str>) -> Option<ExecutionMode> {
+        let ip_socket = ExecutionMode::extract_ip_socket(possible_host);
+        match ip_socket {
+            Some(socket) => Some(ExecutionMode::Client(socket)),
+            None => None
+        }
+    }
+
+    fn extract_ip_socket(possible_host: Option<&str>) -> Option<SocketAddr> {
+        // let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
+        match possible_host {
+            Some(host) => {
+                let host = host.parse::<SocketAddr>();
+                match host {
+                    Ok(socket_addr) => Some(socket_addr),
+                    Err(e) =>  {
+                        eprintln!("{:?}", e);
+                        None
+                    }
+                }
+            },
             None => None
         }
     }
