@@ -1,8 +1,9 @@
 extern crate clap;
 
-pub mod directory_watcher;
-pub mod error;
+mod directory_watcher;
+mod error;
 mod cli_config;
+mod executor;
 
 use cli_config::CliConfig;
 use clap::App;
@@ -18,5 +19,9 @@ pub fn run_syncer() {
         .args(args.get_cli_args())
         .get_matches();
     let extracted_args = CliConfig::extract_args(matches);
-    println!("{}", extracted_args.unwrap());
+    match extracted_args {
+        Ok(args) => executor::execute_mode(args),
+        Err(e) => eprintln!("{}", e)
+    }
+
 }

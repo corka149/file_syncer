@@ -2,9 +2,13 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::{thread, time, time::SystemTime};
 use std::error::Error;
-use std::fs::{ReadDir, Metadata};
+use std::fs::{File, ReadDir, Metadata};
+use std::io::prelude::*;
+use std;
 
 use error::PathError;
+
+const APP_NAME: &str = env!("CARGO_PKG_NAME");
 
 pub struct DirectoryWatcher<'a> {
     /// Indicates how often should the directory be checked.
@@ -65,6 +69,21 @@ impl<'a> DirectoryWatcher<'a> {
     /// Registers file when it can be converted to a valid &str.
     fn register_file(&mut self, path: PathBuf, modified_time: SystemTime) {
         self.file_register.insert(path, modified_time);
+    }
+
+    fn read_file(path: &PathBuf) {
+        let path = path.as_path();
+        match File::open(path) {
+            Ok(mut file) => {
+                let mut byte_buffer: Vec<u8> = Vec::new();
+                let read_result = file.read_to_end(&mut byte_buffer);                
+            },
+            Err(_) => eprintln!("File '{:?}' couldn't be opened.", path)
+        }
+    }
+
+    fn hash_bytes(read_result: Result<usize, std::io::Error>, byte_buffer: Vec<u8>) {
+
     }
 }
 

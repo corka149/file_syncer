@@ -121,7 +121,6 @@ impl fmt::Display for ExecutionMode {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
     #[test]
     fn test_do_str_equal_true() {
